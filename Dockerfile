@@ -23,7 +23,6 @@ RUN sed -ri -e 's!expose_php = On!expose_php = Off!g' $PHP_INI_DIR/php.ini-produ
     && sed -ri -e 's!KeepAliveTimeout .*!KeepAliveTimeout 65!g' /etc/apache2/apache2.conf \
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-COPY php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini.disabled
 
 #apache setup, disable all sites, enable mods, enable configs
 COPY apache/disable-elb-healthcheck-log.conf /etc/apache2/conf-available/
@@ -40,14 +39,6 @@ COPY apache/sites/*.conf /etc/apache2/sites-available/
 COPY --from=composer:2.1.9 /usr/bin/composer /usr/bin/composer
 
 #adds "dev" stage command to enable xdebug
-COPY commands/enable-xdebug /usr/local/bin/
-RUN chmod +x /usr/local/bin/enable-xdebug \
-    && mkdir -p /usr/local/tasks/
 
-#adds common tasks used through Taskfiles
-COPY tasks/ /usr/local/tasks/
-
-#setup task, for running Taskfiles
-RUN curl -sL https://taskfile.dev/install.sh | BINDIR=/usr/local/bin sh
 
 CMD ["apache2-foreground"]
